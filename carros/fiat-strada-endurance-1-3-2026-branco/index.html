@@ -471,6 +471,7 @@ h2{font:700 clamp(2.2rem,5.2vw,3.5rem)/1 var(--display);text-wrap:balance}
   <symbol id="i-cam" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></g></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></g></symbol>
   <symbol id="i-share" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></g></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></g></symbol>
   <symbol id="i-prev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
@@ -1080,6 +1081,48 @@ lb.addEventListener("touchend",function(e){var dx=e.changedTouches[0].clientX-tx
       document.body.removeChild(t);if(r)ok();else{lab.textContent="Copie o endereço da barra";setTimeout(function(){lab.textContent=old},3000)}
     }
   }
+  var JZ=null;
+  function loadZip(){
+    if(window.JSZip)return Promise.resolve();
+    if(JZ)return JZ;
+    JZ=new Promise(function(res,rej){var s=document.createElement("script");s.src="/jszip.min.js";s.onload=res;s.onerror=function(){JZ=null;rej()};document.head.appendChild(s)});
+    return JZ;
+  }
+  function initDl(c){
+    var b=$("#vp-dl");if(!b||!c.ph)return;
+    var lab=b.querySelector("span"),old=lab.textContent,files=null,busy=false;
+    var base=(c.sl||"carro")+"-";
+    function reset(t){lab.textContent=t||old;b.disabled=false;busy=false}
+    function fetchAll(){
+      return Promise.all(c.ph.map(function(src,k){
+        return fetch(src).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(bl){return new File([bl],base+(k+1)+".jpg",{type:"image/jpeg"})});
+      }));
+    }
+    function zip(fs){
+      return loadZip().then(function(){
+        var z=new JSZip();fs.forEach(function(f){z.file(f.name,f)});
+        return z.generateAsync({type:"blob"});
+      }).then(function(bl){
+        var a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download=(c.sl||"fotos")+".zip";
+        document.body.appendChild(a);a.click();document.body.removeChild(a);
+        setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
+      });
+    }
+    b.addEventListener("click",function(){
+      if(busy)return;
+      if(files){
+        busy=true;
+        navigator.share({files:files,title:c.n}).catch(function(){}).then(function(){reset()});
+        return;
+      }
+      busy=true;b.disabled=true;lab.textContent="Preparando as fotos...";
+      fetchAll().then(function(fs){
+        var canShare=navigator.canShare&&navigator.canShare({files:fs})&&matchMedia("(pointer:coarse)").matches;
+        if(canShare){files=fs;reset("Toque para salvar as fotos");setTimeout(function(){files=null;lab.textContent=old},60000);return}
+        return zip(fs).then(function(){reset("Fotos baixadas")}).then(function(){setTimeout(function(){lab.textContent=old},3000)});
+      }).catch(function(){reset("Não foi possível baixar");setTimeout(function(){lab.textContent=old},3000)});
+    });
+  }
   function open(c){
     car=c;cur=0;on=true;
     mainEl.hidden=true;vp.hidden=false;document.body.classList.add("vp-on");
@@ -1098,7 +1141,7 @@ lb.addEventListener("touchend",function(e){var dx=e.changedTouches[0].clientX-tx
         '<h1>'+esc(c.n).split(" ").map(function(w){return w.indexOf("-")>-1?'<span style="white-space:nowrap">'+w+'</span>':w}).join(" ")+'</h1><p class="vp-sub">'+esc([c.y,c.cor,c.k].filter(Boolean).join(" · "))+'</p>'+
         '<div class="vp-pr">'+esc(c.p)+'</div>'+
         '<div class="vp-cta"><a class="btn btn-y" href="'+wa(interest(c))+'" target="_blank" rel="noopener">'+icon("wa")+'Tenho interesse</a>'+
-        '<button class="btn" type="button" id="vp-share">'+icon("share")+'<span>Compartilhar</span></button></div>'+
+        '<button class="btn" type="button" id="vp-share">'+icon("share")+'<span>Compartilhar</span></button>'+(c.ph?'<button class="btn" type="button" id="vp-dl">'+icon("dl")+'<span>Baixar fotos</span></button>':'')+'</div>'+
         '<p class="vp-store"><b>JPmotors +Carros</b>Av. Madre Paulina, 14, Avaré, SP<br>Seg a sex 9h às 18h, sáb 9h às 16h</p>'+
       '</aside></div>'+
       '<div class="vp-sec hz" aria-hidden="true"></div>'+
@@ -1118,6 +1161,7 @@ lb.addEventListener("touchend",function(e){var dx=e.changedTouches[0].clientX-tx
     m.addEventListener("touchend",function(e){var d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>45)go(cur+(d<0?1:-1))});
     paint();
     }
+    initDl(c);
     $("#vp-share").addEventListener("click",function(e){
       var u=location.href;
       if(navigator.share){navigator.share({title:document.title,url:u}).catch(function(){copy(u,e.currentTarget)})}else copy(u,e.currentTarget);
