@@ -779,8 +779,11 @@ $$(".rv").forEach(reveal);
 /* estoque */
 var st={cat:"todos",q:"",ord:"dest",n:STEP,mk:"",gb:"",ya:0,km:0,pr:0};
 var grid=$("#grid"),more=$("#more");
+function match(c,skip){
+  return (skip==="cat"||st.cat==="todos"||c.t===st.cat)&&(!st.q||c.s.indexOf(st.q)>-1)&&(skip==="mk"||!st.mk||c.mk===st.mk)&&(!st.gb||c.g===st.gb)&&(!st.ya||c.yn>=st.ya)&&(!st.km||(c.kn>0&&c.kn<=st.km))&&(!st.pr||c.pn<=st.pr);
+}
 function list(){
-  var l=cars.filter(function(c){return (st.cat==="todos"||c.t===st.cat)&&(!st.q||c.s.indexOf(st.q)>-1)&&(!st.mk||c.mk===st.mk)&&(!st.gb||c.g===st.gb)&&(!st.ya||c.yn>=st.ya)&&(!st.km||(c.kn>0&&c.kn<=st.km))&&(!st.pr||c.pn<=st.pr)});
+  var l=cars.filter(function(c){return match(c)});
   l.sort(function(a,b){
     if(st.ord==="menor")return a.pn-b.pn;
     if(st.ord==="maior")return b.pn-a.pn;
@@ -810,6 +813,7 @@ function render(from){
   }else{
     grid.innerHTML=shown.map(function(c,k){return card(c,k,from)}).join("");
   }
+  chips();if(fm)sync();
   $("#count").textContent=l.length===cars.length?cars.length+" veículos":"Mostrando "+Math.min(shown.length,l.length)+" de "+l.length+" veículos";
   var rest=l.length-shown.length;
   more.hidden=rest<=0;
@@ -818,8 +822,8 @@ function render(from){
 function chips(){
   var cats=["todos","hatch","sedan","suv","utilitario","moto"];
   $("#chips").innerHTML=cats.map(function(k){
-    var n=k==="todos"?cars.length:cars.filter(function(c){return c.t===k}).length;
-    if(!n)return "";
+    var n=cars.filter(function(c){return match(c,"cat")&&(k==="todos"||c.t===k)}).length;
+    if(!n&&st.cat!==k)return "";
     return '<button class="chip" type="button" data-cat="'+k+'" aria-pressed="'+(st.cat===k)+'">'+(k==="todos"?"Todos":LAB[k])+' <small>'+n+'</small></button>';
   }).join("");
 }
@@ -856,13 +860,19 @@ chips();render(0);
 /* filtros avançados */
 var PMAX=Math.ceil(Math.max.apply(null,cars.map(function(c){return c.pn}))/10000)*10000,PMIN=10000;
 var fm=$("#f-marca"),fg=$("#f-cambio"),fa=$("#f-ano"),fk=$("#f-km"),fp=$("#f-preco"),fv=$("#f-pv"),fc=$("#f-clr"),fn=$("#f-note");
-var brands={};cars.forEach(function(c){brands[c.mk]=(brands[c.mk]||0)+1});
-Object.keys(brands).sort().forEach(function(b){var o=document.createElement("option");o.value=b;o.textContent=b+" ("+brands[b]+")";fm.appendChild(o)});
+function brandOpts(){
+  var br={};cars.forEach(function(c){if(match(c,"mk"))br[c.mk]=(br[c.mk]||0)+1});
+  var cur=st.mk;if(cur&&!br[cur])br[cur]=0;
+  fm.innerHTML='<option value="">Todas</option>';
+  Object.keys(br).sort().forEach(function(b){var o=document.createElement("option");o.value=b;o.textContent=b+" ("+br[b]+")";fm.appendChild(o)});
+  fm.value=cur;
+}
 var ys=cars.map(function(c){return c.yn}),y0=Math.min.apply(null,ys),y1=Math.max.apply(null,ys);
 for(var y=y1;y>=y0;y--){var o=document.createElement("option");o.value=y;o.textContent=y+" ou mais novo";fa.appendChild(o)}
 fp.min=PMIN;fp.max=PMAX;fp.value=PMAX;
 function money(n){return "R$ "+n.toLocaleString("pt-BR")}
 function sync(){
+  brandOpts();
   fv.textContent=st.pr?money(st.pr):"sem limite";
   fc.hidden=!(st.mk||st.gb||st.ya||st.km||st.pr);
   fn.textContent=st.km?"Com filtro de quilometragem, aparecem só os carros com km informada.":"";
