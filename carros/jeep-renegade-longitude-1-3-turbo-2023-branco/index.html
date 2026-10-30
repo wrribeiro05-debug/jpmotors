@@ -458,6 +458,9 @@ h2{font:700 clamp(2.2rem,5.2vw,3.5rem)/1 var(--display);text-wrap:balance}
 .fan-arr{background:#1a1c20b3;border-color:#ffffff24}
 /* valores em verde */
 .pr,.fc-t span,.lb-pr,.vp-pr,.vp-bar b{color:#3fd47e}
+.dest.novo{background:#3fd47e}
+.pc{margin-top:6px;font-size:.84rem;color:var(--soft)}
+@media(max-width:640px){.ck{padding:10px 12px;gap:8px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}.ck p{font-size:.8rem;line-height:1.35}.ck .btn{padding:8px 12px;font-size:.85rem}}
 .hd-logo{opacity:0;transform:translateY(-6px)}
 .hd.sc .hd-logo{opacity:1;transform:none}
 .vp-on .hd-logo{opacity:1;transform:none}
@@ -688,9 +691,6 @@ h2{font:700 clamp(2.2rem,5.2vw,3.5rem)/1 var(--display);text-wrap:balance}
   </div>
 </div>
 
-<div class="av" id="av" hidden role="dialog" aria-modal="true" aria-label="Aviso">
-  <div class="av-box"><button class="av-x" type="button" id="av-x2" aria-label="Fechar aviso">&times;</button><img id="av-img" src="/feirao.jpg" alt="Mega Feirão JPmotors +Carros na Emapa Avaré, de 15 a 18 de outubro, carros e motos, taxa especial e prazo de até 60 meses"><button class="btn btn-y" type="button" id="av-x">Fechar</button></div>
-</div>
 <a class="fab" id="fab" data-wa aria-label="Chamar no WhatsApp"><svg class="ic"><use href="#i-wa"/></svg></a>
 
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Fotos do veículo">
@@ -801,6 +801,8 @@ function list(){
   });
   return l;
 }
+function isNovo(c){return (Date.now()-new Date(c.d+"T12:00:00-03:00").getTime())<=7*864e5}
+function parc(c){var v=c.t==="moto"?690:c.pn<=30000?790:c.pn<=50000?890:c.pn<=80000?990:c.pn<=100000?1290:1590;return v.toLocaleString("pt-BR")}
 function card(c,idx,from){
   var th=c.ph
     ?'<button class="th" type="button" data-open="'+c.i+'" aria-label="Ver as '+c.ph.length+' fotos: '+esc(c.n)+'"><img src="'+(c.tb||c.ph[0])+'" alt="'+esc(c.n)+'" decoding="async" loading="lazy"><span class="ph-n">'+icon("cam")+c.ph.length+'</span></button>'
@@ -809,9 +811,9 @@ function card(c,idx,from){
   var cls="card"+(idx>=from?" rise":"");
   var delay=idx>=from?' style="animation-delay:'+Math.min(idx-from,11)*45+'ms"':"";
   return '<article class="'+cls+'"'+delay+'>'+th+
-    '<span class="tag">'+LAB[c.t]+'</span>'+(DEST.indexOf(c.n+"|"+c.y)>-1?'<span class="dest">Destaque</span>':'')+
+    '<span class="tag">'+LAB[c.t]+'</span>'+(isNovo(c)?'<span class="dest novo">Novo</span>':(DEST.indexOf(c.n+"|"+c.y)>-1?'<span class="dest">Destaque</span>':''))+
     '<div class="cb"><h3>'+esc(c.n)+'</h3><p class="mt">'+esc(meta(c))+'</p><ul class="tg">'+tags+'</ul>'+
-    '<div class="pr">'+esc(c.p)+'</div>'+
+    '<div class="pr">'+esc(c.p)+'</div>'+'<div class="pc">Parcelas a partir de R$ '+parc(c)+'</div>'+
     '<a class="btn" href="'+wa(interest(c))+'" target="_blank" rel="noopener">'+icon("wa")+'Tenho interesse</a>'+'<a class="btn btn-y" href="'+(PROD?"/carros/"+c.sl+"/":"#carro-"+c.sl)+'">Mais informações</a>'+'</div></article>';
 }
 function render(from){
@@ -851,20 +853,6 @@ chips();render(0);
 
 
 
-/* aviso ao entrar: "on:false" desliga; "ate" esconde sozinho depois da data */
-(function(){
-  var AVISO={on:true,ate:"2026-10-18T23:59:59-03:00"};
-  var el=$("#av");if(!AVISO.on||!el)return;
-  if(AVISO.ate&&Date.now()>new Date(AVISO.ate).getTime())return;
-  try{if(sessionStorage.getItem("jp-aviso"))return}catch(e){}
-  el.hidden=false;document.documentElement.style.overflow="hidden";
-  var x=$("#av-x");x.focus();
-  function fecha(){el.hidden=true;document.documentElement.style.overflow="";document.removeEventListener("keydown",key);try{sessionStorage.setItem("jp-aviso","1")}catch(e){}}
-  function key(e){if(e.key==="Escape")fecha()}
-  x.addEventListener("click",fecha);$("#av-x2").addEventListener("click",fecha);
-  el.addEventListener("click",function(e){if(e.target===el)fecha()});
-  document.addEventListener("keydown",key);
-})();
 
 /* filtros avançados */
 var PMAX=Math.ceil(Math.max.apply(null,cars.map(function(c){return c.pn}))/10000)*10000,PMIN=10000;
