@@ -458,7 +458,6 @@ h2{font:700 clamp(2.2rem,5.2vw,3.5rem)/1 var(--display);text-wrap:balance}
 .fan-arr{background:#1a1c20b3;border-color:#ffffff24}
 .dest.novo{background:#e5383b;color:#fff}
 .rev figure{justify-content:flex-start}.rev figcaption{margin-top:auto;padding-top:6px}
-.pc{margin-top:6px;font-size:.84rem;color:var(--soft)}
 @media(max-width:640px){.ck{padding:10px 12px;gap:8px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}.ck p{font-size:.8rem;line-height:1.35}.ck .btn{padding:8px 12px;font-size:.85rem}}
 .hd-logo{opacity:0;transform:translateY(-6px)}
 .hd.sc .hd-logo{opacity:1;transform:none}
@@ -803,7 +802,6 @@ function list(){
   return l;
 }
 function isNovo(c){return (Date.now()-new Date(c.d+"T12:00:00-03:00").getTime())<=7*864e5}
-function parc(c){var k=Math.floor(c.pn/1000),T=[[10,499],[20,699],[30,799],[40,899],[50,999],[60,1099],[70,1199],[80,1299],[90,1399],[100,1499]],v=1599;for(var i=0;i<T.length;i++){if(k<=T[i][0]){v=T[i][1];break}}return v.toLocaleString("pt-BR")}
 function card(c,idx,from){
   var th=c.ph
     ?'<button class="th" type="button" data-open="'+c.i+'" aria-label="Ver as '+c.ph.length+' fotos: '+esc(c.n)+'"><img src="'+(c.tb||c.ph[0])+'" alt="'+esc(c.n)+'" decoding="async" loading="lazy"><span class="ph-n">'+icon("cam")+c.ph.length+'</span></button>'
@@ -814,7 +812,7 @@ function card(c,idx,from){
   return '<article class="'+cls+'"'+delay+'>'+th+
     '<span class="tag">'+LAB[c.t]+'</span>'+(isNovo(c)?'<span class="dest novo">Novo</span>':(DEST.indexOf(c.n+"|"+c.y)>-1?'<span class="dest">Destaque</span>':''))+
     '<div class="cb"><h3>'+esc(c.n)+'</h3><p class="mt">'+esc(meta(c))+'</p><ul class="tg">'+tags+'</ul>'+
-    '<div class="pr">'+esc(c.p)+'</div>'+'<div class="pc">Parcelas a partir de R$ '+parc(c)+'</div>'+
+    '<div class="pr">'+esc(c.p)+'</div>'+
     '<a class="btn" href="'+wa(interest(c))+'" target="_blank" rel="noopener">'+icon("wa")+'Tenho interesse</a>'+'<a class="btn btn-y" href="'+(PROD?"/carros/"+c.sl+"/":"#carro-"+c.sl)+'">Mais informações</a>'+'</div></article>';
 }
 function render(from){
