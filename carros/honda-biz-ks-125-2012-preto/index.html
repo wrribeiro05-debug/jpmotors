@@ -539,7 +539,7 @@ h2{font:700 clamp(2.2rem,5.2vw,3.5rem)/1 var(--display);text-wrap:balance}
         <div class="tool-r">
           <label class="fld"><span class="sr">Buscar veículo</span><svg class="ic"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Buscar modelo ou ano" autocomplete="off"></label>
           <label class="fld"><span class="sr">Ordenar por</span><select id="ord">
-            <option value="dest">Destaques</option>
+            <option value="dest">Mais recentes</option>
             <option value="menor">Menor preço</option>
             <option value="maior">Maior preço</option>
             <option value="novo">Mais novos</option>
@@ -706,6 +706,8 @@ h2{font:700 clamp(2.2rem,5.2vw,3.5rem)/1 var(--display);text-wrap:balance}
 <script>
 (function(){
 "use strict";
+/* data em que cada carro entrou no site (AAAA-MM-DD); carro novo entra aqui com a data de hoje. A ordem padrão mostra os mais novos primeiro */
+var ADD={"citroen-cactus-feel-1-6-2022-cinza":"2026-10-19","fiat-argo-drive-1-0-2023-branco":"2026-10-19","fiat-fiorino-endurance-1-3-2025-branco":"2026-10-19","fiat-idea-adventure-1-8-2011-vermelho":"2026-10-19","fiat-mobi-like-1-0-2019-branco":"2026-10-19","fiat-mobi-like-1-0-2023-prata":"2026-10-19","fiat-palio-attractiv-1-0-2013-preto":"2026-10-19","fiat-palio-fire-eco-1-0-2010-prata":"2026-10-19","fiat-strada-endurance-1-3-2026-branco":"2026-10-19","fiat-uno-mille-1-0-2p-2010-branco":"2026-10-19","fiat-uno-way-1-4-2014-prata":"2026-10-19","ford-ecosport-fst-2-0-2015-prata":"2026-10-19","ford-ecosport-titanium-2-0-2018-branco":"2026-10-24","ford-fiesta-1-0-2014-prata":"2026-10-19","ford-ka-1-0-2013-vermelho":"2026-10-27","ford-ka-se-1-0-2020-cinza":"2026-10-19","ford-ka-se-1-0-2020-prata":"2026-10-19","ford-ka-se-1-0-2021-prata":"2026-10-19","ford-new-fiesta-1-5-2016-preto":"2026-10-19","gm-classic-spirit-1-0-4p-2008-prata":"2026-10-19","gm-corsa-maxx-1-4-2011-cinza":"2026-10-19","gm-corsa-sedan-prem-1-4-2010-verde":"2026-10-19","gm-cruze-lt-1-8-2012-cinza":"2026-10-19","gm-cruze-ltz-1-8-2012-prata":"2026-10-30","gm-cruze-ltz-hb-sport-1-8-2012-preto":"2026-10-26","gm-meriva-1-8-2003-branco":"2026-10-19","gm-meriva-joy-1-8-2008-branco":"2026-10-19","gm-onix-joy-1-0-2018-cinza":"2026-10-19","gm-onix-lt-1-0-2021-preto":"2026-10-19","gm-onix-lt-1-4-2015-branco":"2026-10-19","gm-onix-lt-1-4-2018-azul":"2026-10-19","gm-onix-ltz-1-4-2014-cinza":"2026-10-19","gm-onix-ltz-1-4-2016-branco":"2026-10-19","gm-onix-premier-tb-1-0-2020-preto":"2026-10-19","gm-prisma-lt-1-4-2012-cinza":"2026-10-19","gm-spin-ltz-1-8-2014-cinza":"2026-10-26","gm-spin-ltz-1-8-2017-branco":"2026-10-19","gm-vectra-elegance-2-0-2009-branco":"2026-10-19","honda-biz-ks-125-2012-preto":"2026-10-19","honda-cb-300r-2010-amarelo":"2026-10-19","honda-cb-300r-2012-amarelo":"2026-10-19","honda-cb-300r-2012-vermelho":"2026-10-19","honda-civic-lxl-1-8-2012-branco":"2026-10-28","honda-civic-lxs-1-8-2007-preto":"2026-10-28","honda-fan-150-2012-preto":"2026-10-19","honda-fan-160-2025-preto":"2026-10-19","honda-fit-ex-1-5-2013-vermelho":"2026-10-19","honda-titan-150-2007-vermelho":"2026-10-19","honda-titan-150-2013-preto":"2026-10-19","hyundai-creta-prest-2-0-2020-preto":"2026-10-19","hyundai-creta-prest-2-0-2021-branco":"2026-10-19","hyundai-hb20-sense-1-0-2023-prata":"2026-10-19","hyundai-hb20s-comf-plus-1-0-2015-cinza":"2026-10-26","hyundai-hb20s-comf-plus-1-0-2016-branco":"2026-10-19","hyundai-hb20s-comf-plus-1-0-2024-prata":"2026-10-19","hyundai-hb20s-comf-plus-1-0-2025-prata":"2026-10-19","hyundai-tucson-gls-2-0-2013-preto":"2026-10-19","jeep-renegade-1-8-2020-prata":"2026-10-26","jeep-renegade-longitude-1-3-turbo-2023-branco":"2026-10-28","jtz-dk-160-2023-preta":"2026-10-19","nissan-march-s-1-6-2013-prata":"2026-10-19","nissan-march-sl-1-6-2017-branco":"2026-10-19","onix-premier-tb-1-0-2020-preto":"2026-10-19","renault-logan-zen-1-0-2021-prata":"2026-10-19","renault-sandero-life-1-0-2020-branco":"2026-10-19","toyota-corolla-xei-2-0-2015-cinza":"2026-10-23","toyota-etios-x-1-3-2019-branco":"2026-10-19","toyota-etios-x-1-3-2019-cinza":"2026-10-19","vw-gol-special-1-0-2015-vermelho":"2026-10-19","vw-golf-comfortline-1-0-2017-branco":"2026-10-19","vw-polo-mpi-1-0-2024-prata":"2026-10-19","vw-polo-sedan-1-6-2008-prata":"2026-10-19","vw-t-cross-highline-1-4-2020-branco":"2026-10-23","vw-voyage-1-0-2010-preto":"2026-10-19","vw-voyage-1-0-2015-branco":"2026-10-19","yamaha-fazer-250-2014-vermelho":"2026-10-19"};
 var DEST=["Hyundai Creta Prest. 2.0|2019/2020","Hyundai Creta Prest. 2.0|2020/2021","Hyundai HB20S Comf Plus 1.0|2024/2025","VW Golf Comfortline 1.0|2016/2017","Fiat Strada Endurance 1.3|2025/2026"];
 var CFG={wa:"5514997752646",review:"https://g.page/r/CcThWpONEFLMEBM/review",social:{instagram:"https://instagram.com/mais_carros",facebook:"https://www.facebook.com/share/19jik8Gv2f/"}};
 var REVIEWS=[
@@ -732,6 +734,7 @@ function interest(c){return "Olá! Tenho interesse no "+c.n+" "+c.y+" ("+c.p+").
 cars.forEach(function(c,i){
   c.i=i;
   c.sl=norm(c.n+" "+c.y.split("/").pop()+" "+c.cor).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+  c.d=ADD[c.sl]||"2026-10-19";
   c.pn=+c.p.replace(/\D/g,"");
   c.yn=+c.y.split("/").pop();
   c.mk=({"GM":"Chevrolet","VW":"Volkswagen","Onix":"Chevrolet","Citroen":"Citroën"})[c.n.split(" ")[0]]||c.n.split(" ")[0];
@@ -788,7 +791,7 @@ function list(){
     if(st.ord==="menor")return a.pn-b.pn;
     if(st.ord==="maior")return b.pn-a.pn;
     if(st.ord==="novo")return b.yn-a.yn||a.pn-b.pn;
-    return (a.ph?0:1)-(b.ph?0:1)||a.pn-b.pn;
+    return (a.d<b.d?1:a.d>b.d?-1:0)||(a.ph?0:1)-(b.ph?0:1)||a.pn-b.pn;
   });
   return l;
 }
